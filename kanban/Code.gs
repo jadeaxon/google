@@ -32,6 +32,11 @@ function compactColumns() {
 } // compactColumns()
 
 function moveToDone() {
+  function replacer(match, p1, p2, offset, string) {
+    var episode = Number(p2) + 1;
+    return "\ns" + p1 + "e" + episode;
+  }
+
   // Personal Kanban
   var spreadsheet = SpreadsheetApp.openByUrl('https://docs.google.com/spreadsheets/d/1zXpRv6WFdb9eX9YDerTTCE7L3N6InYxJ-FYec9ok79I/edit');
   var sheet = spreadsheet.getSheetByName('Kanban');
@@ -52,6 +57,13 @@ function moveToDone() {
       blankCell.setValue(currentValue);
       if (currentCell.getColumn() != 1) {
         currentCell.setValue('');
+      }
+      else { // We are in the first column (progressive tasks).
+        // Shows are tracked with s1e1 for season 1, episode 1.  Bump the episode.
+        if (currentValue.match(/\ns\d+e\d+/m)) {
+          currentValue = currentValue.replace(/\ns(\d+)e(\d+)/m, replacer);
+          currentCell.setValue(currentValue);
+        }
       }
       break;
     }
