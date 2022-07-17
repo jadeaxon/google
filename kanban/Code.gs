@@ -45,6 +45,7 @@ function moveToDone() {
   var currentCell = SpreadsheetApp.getActiveSheet().getActiveCell();
   var currentValue = currentCell.getValue();
   var doneColumn = 4; // Base 0.
+  var logCell = sheet.getRange(10, 4);
 
   // Scan each row of Done column for a blank.
   // Copy to first blank cell then stop.
@@ -57,6 +58,28 @@ function moveToDone() {
       blankCell.setValue(currentValue);
       if (currentCell.getColumn() != 1) {
         currentCell.setValue('');
+
+        // Look for last non-blank cell to bubble up (assuming no gaps).
+        var c = currentCell.getColumn();
+        var r = currentCell.getRow();
+        // logCell.setValue(data.length);
+        var cellPrev = null;
+        for (var r2i = r; r2i < data.length; r2i++) {
+          var cell = sheet.getRange(r2i, c);
+          var v2 = cell.getValue();
+          /*
+          logCell.setValue(v2);
+          SpreadsheetApp.flush();
+          Utilities.sleep(1000);
+          SpreadsheetApp.flush();
+          */
+          if (v2 == '') {
+            currentCell.setValue(cellPrev.getValue());
+            cellPrev.setValue('');
+            break;
+          }
+          cellPrev = cell;
+        } // next row in column of cell marked done
       }
       else { // We are in the first column (progressive tasks).
         // Shows are tracked with s1e1 for season 1, episode 1.  Bump the episode.
